@@ -4,6 +4,7 @@ name = "rpc-cli"
 version = "0.1.0"
 license = "MIT"
 repository = "https://github.com/rust-playground/rpc2.0/tree/master/rpc-cli"
+description = "cli for making RPC 2.0 requests"
 
 [dependencies]
 clap = "2.31.2"

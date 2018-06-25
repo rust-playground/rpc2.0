@@ -4,6 +4,7 @@ name = "rpc-lib"
 version = "0.1.0"
 license = "MIT"
 repository = "https://github.com/rust-playground/rpc2.0/tree/master/rpc-lib"
+description = "Contains Client for making RPC 2.0 requests"
 
 [dependencies]
 reqwest = "0.8.6"
