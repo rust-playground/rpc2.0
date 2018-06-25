@@ -1,0 +1,14 @@
+[package]
+authors = ["Dean Karn <dean.karn@gmail.com>"]
+name = "rpc-cli"
+version = "1.0.0"
+license = "MIT"
+
+[dependencies]
+clap = "2.31.2"
+openssl-probe = "0.1.2"
+serde = "1.0.66"
+serde_json = "1.0.20"
+
+[dependencies.rpc-lib]
+path = "../rpc-lib"
