@@ -1,8 +1,9 @@
 [package]
 authors = ["Dean Karn <dean.karn@gmail.com>"]
 name = "rpc-cli"
-version = "1.0.0"
+version = "0.1.0"
 license = "MIT"
+repository = "https://github.com/rust-playground/rpc2.0/tree/master/rpc-cli"
 
 [dependencies]
 clap = "2.31.2"
