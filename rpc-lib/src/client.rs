@@ -15,7 +15,7 @@ use serde::de;
 use serde::de::{DeserializeOwned, Deserializer, MapAccess, Visitor};
 use serde::{Deserialize, Serialize};
 
-use reqwest::header::{Accept, Authorization, Basic, ContentType, Headers};
+use reqwest::header::{Accept, Authorization, Basic, ContentType, Headers, UserAgent};
 use reqwest::mime;
 
 const RPC_VERSION: &'static str = "2.0";
@@ -86,15 +86,25 @@ impl Auth {
 pub struct Client<'a> {
     url: &'a str,
     auth: Option<Auth>,
+    user_agent: String,
 }
 
 impl<'a> Client<'a> {
     pub fn new(url: &'a str) -> Self {
-        Client { url, auth: None }
+        Client {
+            url,
+            auth: None,
+            user_agent: format!("rpc-lib/{}", env!("CARGO_PKG_VERSION")),
+        }
     }
 
     pub fn with_basic_auth(mut self, username: String, password: Option<String>) -> Self {
         self.auth = Some(Auth::new(username, password));
+        self
+    }
+
+    pub fn with_user_agent(mut self, user_agent: String) -> Self {
+        self.user_agent = user_agent;
         self
     }
 
@@ -105,6 +115,7 @@ impl<'a> Client<'a> {
         let req = Request::new(id, method, params);
         let j = serde_json::to_string(&req)?;
         let mut headers = Headers::new();
+        headers.set(UserAgent::new(self.user_agent.clone()));
         headers.set(Accept::json());
         headers.set(ContentType(mime::APPLICATION_JSON));
 

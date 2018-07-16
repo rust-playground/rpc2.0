@@ -69,7 +69,8 @@ fn main() -> Result<(), Box<Error>> {
     let v: Value = serde_json::from_str(data.as_ref())?;
     let host = matches.value_of(HOST).unwrap();
     let method = matches.value_of(METHOD).unwrap();
-    let client = Client::new(host);
+    let client =
+        Client::new(host).with_user_agent(format!("rpc-cli/{}", env!("CARGO_PKG_VERSION")));
     let res: Value = client.call("1", method, v)?;
 
     let json = if matches.is_present(RAW) {
