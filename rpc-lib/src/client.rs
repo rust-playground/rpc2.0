@@ -1,3 +1,4 @@
+extern crate failure;
 extern crate reqwest;
 extern crate serde_json;
 
@@ -6,9 +7,9 @@ pub mod prelude {
     pub use client::Client;
 }
 
-use std::error;
+use error::{Error, ResponseError};
+
 use std::fmt;
-use std::fmt::Display;
 use std::mem;
 
 use serde::de;
@@ -19,55 +20,6 @@ use reqwest::header::{Accept, Authorization, Basic, ContentType, Headers, UserAg
 use reqwest::mime;
 
 const RPC_VERSION: &'static str = "2.0";
-
-/// Error represents the RPC error.
-///
-/// Error can be one of many types that can occur during a request.
-///
-#[derive(Debug)]
-pub enum Error {
-    Serialize(serde_json::Error),
-    Request(reqwest::Error),
-    RPC(ResponseError),
-    Response(String),
-}
-
-impl From<serde_json::Error> for Error {
-    fn from(err: serde_json::Error) -> Error {
-        Error::Serialize(err)
-    }
-}
-
-impl From<reqwest::Error> for Error {
-    fn from(err: reqwest::Error) -> Error {
-        Error::Request(err)
-    }
-}
-
-impl Display for Error {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match *self {
-            Error::Serialize(ref err) => Display::fmt(err, f),
-            Error::Request(ref err) => Display::fmt(err, f),
-            Error::RPC(ref s) => f.write_str(format!("{:?}", s).as_ref()),
-            Error::Response(ref err) => f.write_str(err),
-        }
-    }
-}
-
-impl error::Error for Error {
-    fn description(&self) -> &str {
-        ""
-    }
-
-    fn cause(&self) -> Option<&error::Error> {
-        match self {
-            Error::Serialize(ref err) => Some(err),
-            Error::Request(ref err) => Some(err),
-            _ => None,
-        }
-    }
-}
 
 #[derive(Debug)]
 struct Auth {
@@ -130,25 +82,21 @@ impl<'a> Client<'a> {
         let client = reqwest::Client::new();
         let mut res = client.post(self.url).headers(headers).body(j).send()?;
 
+        // TODO: implement HTTP error derived from response code
+
         let results: Response<T> = res.json()?;
         if results.error.is_some() {
-            return Err(Error::RPC(results.error.unwrap()));
-        }
-        if results.result.is_none() {
-            return Err(Error::Response(String::from(
-                "invalid response, no result returned",
-            )));
+            return Err(Error::from(results.error.unwrap()));
         }
         let mut r = results.result;
-        Ok(mem::replace(&mut r, None).unwrap())
+        r.take().ok_or_else(|| {
+            Error::from(ResponseError {
+                code: 1,
+                message: "blah".to_owned(),
+            })
+        })
+        // Ok(mem::replace(&mut r, None).unwrap())
     }
-}
-
-/// ResponseError contains an RPC 2.0 error
-#[derive(Debug, Deserialize)]
-pub struct ResponseError {
-    code: i32,
-    message: String,
 }
 
 #[derive(Debug, Deserialize)]

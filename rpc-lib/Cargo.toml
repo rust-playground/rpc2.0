@@ -1,12 +1,14 @@
 [package]
 authors = ["Dean Karn <dean.karn@gmail.com>"]
-name = "rpc-lib"
-version = "0.2.0"
-license = "MIT"
-repository = "https://github.com/rust-playground/rpc2.0/tree/master/rpc-lib"
 description = "Contains Client for making RPC 2.0 requests"
+license = "MIT"
+name = "rpc-lib"
+repository = "https://github.com/rust-playground/rpc2.0/tree/master/rpc-lib"
+version = "0.2.0"
 
 [dependencies]
+failure = "0.1.2"
+failure_derive = "0.1.2"
 reqwest = "0.8.6"
 serde = "1.0.66"
 serde_derive = "1.0.66"

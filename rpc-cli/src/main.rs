@@ -1,18 +1,19 @@
 #[macro_use]
 extern crate clap;
+extern crate failure;
 extern crate openssl_probe;
 extern crate rpc_lib;
 extern crate serde;
 extern crate serde_json;
 
 use clap::{App, Arg};
+use failure::{Error, ResultExt};
 use rpc_lib::client::prelude::*;
 use serde_json::Value;
-use std::error::Error;
 use std::io;
 use std::io::Read;
 
-fn main() -> Result<(), Box<Error>> {
+fn main() -> Result<(), Error> {
     const HOST: &str = "host";
     const METHOD: &str = "method";
     const INPUT: &str = "INPUT";
@@ -64,9 +65,12 @@ fn main() -> Result<(), Box<Error>> {
             handle.read_to_string(&mut buffer)?;
             buffer
         }
-        _ => input.unwrap().to_owned(),
+        _ => match input {
+            Some(s) => s.to_owned(),
+            None => "".to_string(),
+        },
     };
-    let v: Value = serde_json::from_str(data.as_ref())?;
+    let v: Value = serde_json::from_str(data.as_ref()).context("failed to parse INPUT to JSON")?;
     let host = matches.value_of(HOST).unwrap();
     let method = matches.value_of(METHOD).unwrap();
     let client =
