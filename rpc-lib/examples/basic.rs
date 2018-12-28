@@ -2,9 +2,10 @@ extern crate rpc_lib;
 extern crate serde;
 #[macro_use]
 extern crate serde_derive;
+extern crate failure;
 
+use failure::Error;
 use rpc_lib::client::prelude::*;
-use std::error::Error;
 
 #[derive(Serialize)]
 struct Input {
@@ -18,7 +19,7 @@ struct Project {
     enabled: bool,
 }
 
-fn main() -> Result<(), Box<Error>> {
+fn main() -> Result<(), Error> {
     let input = Input {
         id: "x0x0x0x0".to_string(),
     };

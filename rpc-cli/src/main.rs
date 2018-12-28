@@ -1,27 +1,16 @@
-#[macro_use]
-extern crate clap;
-extern crate openssl_probe;
-extern crate rpc_lib;
-extern crate serde;
-extern crate serde_json;
-
-use clap::{App, Arg};
+use clap::{app_from_crate, crate_authors, crate_description, crate_name, crate_version, Arg};
+use failure::{Error, ResultExt};
 use rpc_lib::client::prelude::*;
 use serde_json::Value;
-use std::error::Error;
-use std::io;
-use std::io::Read;
+use std::{io, io::Read};
 
-fn main() -> Result<(), Box<Error>> {
+fn main() -> Result<(), Error> {
     const HOST: &str = "host";
     const METHOD: &str = "method";
     const INPUT: &str = "INPUT";
     const RAW: &str = "raw";
 
-    let matches = App::new("rpc-cli")
-        .version(crate_version!())
-        .author("Dean Karn <dean.karn@gmail.com>")
-        .about("Allows making RPC 2.0 requests")
+    let matches = app_from_crate!("\n")
         .arg(
             Arg::with_name(HOST)
                 .short("h")
@@ -41,7 +30,7 @@ fn main() -> Result<(), Box<Error>> {
         .arg(
             Arg::with_name(RAW)
                 .long("raw")
-                .help("Return the raw results instesad of pretty printed"),
+                .help("Return the raw results instead of pretty printed"),
         )
         .arg(
             Arg::with_name(INPUT)
@@ -64,9 +53,12 @@ fn main() -> Result<(), Box<Error>> {
             handle.read_to_string(&mut buffer)?;
             buffer
         }
-        _ => input.unwrap().to_owned(),
+        _ => match input {
+            Some(s) => s.to_owned(),
+            None => "".to_string(),
+        },
     };
-    let v: Value = serde_json::from_str(data.as_ref())?;
+    let v: Value = serde_json::from_str(data.as_ref()).context("failed to parse INPUT to JSON")?;
     let host = matches.value_of(HOST).unwrap();
     let method = matches.value_of(METHOD).unwrap();
     let client =
