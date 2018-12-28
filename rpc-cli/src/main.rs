@@ -1,17 +1,8 @@
-#[macro_use]
-extern crate clap;
-extern crate failure;
-extern crate openssl_probe;
-extern crate rpc_lib;
-extern crate serde;
-extern crate serde_json;
-
-use clap::{App, Arg};
+use clap::{app_from_crate, crate_authors, crate_description, crate_name, crate_version, Arg};
 use failure::{Error, ResultExt};
 use rpc_lib::client::prelude::*;
 use serde_json::Value;
-use std::io;
-use std::io::Read;
+use std::{io, io::Read};
 
 fn main() -> Result<(), Error> {
     const HOST: &str = "host";
@@ -19,10 +10,7 @@ fn main() -> Result<(), Error> {
     const INPUT: &str = "INPUT";
     const RAW: &str = "raw";
 
-    let matches = App::new("rpc-cli")
-        .version(crate_version!())
-        .author("Dean Karn <dean.karn@gmail.com>")
-        .about("Allows making RPC 2.0 requests")
+    let matches = app_from_crate!("\n")
         .arg(
             Arg::with_name(HOST)
                 .short("h")
@@ -42,7 +30,7 @@ fn main() -> Result<(), Error> {
         .arg(
             Arg::with_name(RAW)
                 .long("raw")
-                .help("Return the raw results instesad of pretty printed"),
+                .help("Return the raw results instead of pretty printed"),
         )
         .arg(
             Arg::with_name(INPUT)
